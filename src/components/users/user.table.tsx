@@ -1,13 +1,23 @@
 import { Interface } from 'readline'
-// import '../../style/userpage.scss';
-
+import '../../style/userpage.scss';
+import CreateModalUser from './create.modal.user';
+import UpdateModalUser from './update.modal.user';
 import { Space, Table, Tag } from 'antd';
 import type { TableProps } from 'antd';
+import { Button, Modal, Divider, notification } from 'antd';
+import { Input } from 'antd';
+
+
 
 
 import { useEffect, useState } from 'react'
+
 const UserTable = () => {
-    const [DataTest1, SetData1] = useState([])
+    const [DataTest1, SetData1] = useState([]);
+    const [access_token, set_accsess_token] = useState('')
+    const [loading_table, set_loading_table] = useState(false)
+    const [open_update_table, set_open_update_table] = useState(false)
+
     interface Iitems {
         _id: string,
         address: string,
@@ -16,6 +26,7 @@ const UserTable = () => {
     }
 
     const GetData1 = async () => {
+        set_loading_table(true)
         const res = await fetch("http://localhost:8000/api/v1/auth/login", {
             method: 'POST',
             body: JSON.stringify({
@@ -40,12 +51,14 @@ const UserTable = () => {
                 }
 
             });
+            set_accsess_token(data.data.access_token)
             console.log(data.data.access_token)
             const data1 = await res1.json();
 
             console.log('>>> check', data1.data.result)
             if (data1 && data1.data && data1.data.result && data1.data.result.length > 0) {
                 SetData1(data1.data.result)
+                set_loading_table(false)
             }
 
         }
@@ -82,8 +95,9 @@ const UserTable = () => {
             key: 'action',
             render: (_, record) => (
                 <Space size="middle">
-                    <a>Invite {record.email}</a>
-                    <a>Delete</a>
+                    <Button onClick={() => set_open_update_table(true)}> <a>Update</a></Button>
+                    <Button>                    <a>Delete</a>
+                    </Button>
                 </Space>
             ),
         },
@@ -94,15 +108,31 @@ const UserTable = () => {
                 columns={columns}
                 dataSource={DataTest1}
                 rowKey={'_id'}
+                loading={loading_table}
             />
 
         )
     }
 
+
+
+
     return (
 
-        <div>
+        <div className='btn-open-modal'>
+            <CreateModalUser
+                GetData1={GetData1}
+                access_token={access_token}
+                set_loading_table={set_loading_table}
+
+            />
+            <UpdateModalUser
+                open_update_table={open_update_table}
+                set_open_update_table={set_open_update_table}
+
+            />
             <TableUser />
+
         </div>
     )
 }
