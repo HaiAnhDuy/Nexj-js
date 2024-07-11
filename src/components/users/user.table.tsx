@@ -11,19 +11,23 @@ import { Input } from 'antd';
 
 
 import { useEffect, useState } from 'react'
-
+export interface Iitems {
+    name: string,
+    _id: string,
+    address: string,
+    age: string,
+    email: string,
+    gender: string,
+    role: string
+}
 const UserTable = () => {
     const [DataTest1, SetData1] = useState([]);
     const [access_token, set_accsess_token] = useState('')
     const [loading_table, set_loading_table] = useState(false)
     const [open_update_table, set_open_update_table] = useState(false)
+    const [data_want_to_edit, set_data_want_to_edit] = useState({})
 
-    interface Iitems {
-        _id: string,
-        address: string,
-        age: number,
-        email: string
-    }
+
 
     const GetData1 = async () => {
         set_loading_table(true)
@@ -69,7 +73,11 @@ const UserTable = () => {
         // update
         GetData1();
     }, [])
-
+    const function_handle_edit = (record: any) => {
+        set_open_update_table(true);
+        set_data_want_to_edit(record)
+        console.log(record)
+    }
 
     const columns: TableProps<Iitems>['columns'] = [
         {
@@ -95,7 +103,7 @@ const UserTable = () => {
             key: 'action',
             render: (_, record) => (
                 <Space size="middle">
-                    <Button onClick={() => set_open_update_table(true)}> <a>Update</a></Button>
+                    <Button onClick={() => function_handle_edit(record)}> <a>Update</a></Button>
                     <Button>                    <a>Delete</a>
                     </Button>
                 </Space>
@@ -129,6 +137,11 @@ const UserTable = () => {
             <UpdateModalUser
                 open_update_table={open_update_table}
                 set_open_update_table={set_open_update_table}
+                data_want_to_edit={data_want_to_edit}
+                set_data_want_to_edit={set_data_want_to_edit}
+                access_token={access_token}
+                GetData1={GetData1}
+
 
             />
             <TableUser />

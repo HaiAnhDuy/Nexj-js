@@ -11,7 +11,6 @@ const CreateModalUser = (props: Iprops) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [name, setname] = useState('')
     const [email, setemail] = useState('')
-
     const [password, setpassword] = useState('')
     const [age, setage] = useState('')
     const [gender, setgender] = useState('')
