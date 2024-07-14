@@ -23,68 +23,67 @@ export interface Iitems {
 }
 const UserTable = () => {
     const [DataTest1, SetData1] = useState([]);
-    const [access_token, set_accsess_token] = useState('')
     const [loading_table, set_loading_table] = useState(false)
     const [open_update_table, set_open_update_table] = useState(false)
     const [data_want_to_edit, set_data_want_to_edit] = useState({})
     const [open_modal_delete, set_modal_delete] = useState(false)
-    const [get_id_delete, set_id_delete] = useState('')
+    const [get_id_delete, set_id_delete] = useState({})
 
+    const [meta, setMeta] = useState({
+        current: 1,
+        pageSize: 5,
+        pages: 0,
+        total: 0
+    })
 
-
+    const access_token = localStorage.getItem('access_token') as string
     const GetData1 = async () => {
         set_loading_table(true)
-        const res = await fetch("http://localhost:8000/api/v1/auth/login", {
-            method: 'POST',
-            body: JSON.stringify({
-                username: 'admin@gmail.com',
-                password: '123456'
-            },
-            ),
+
+
+        // console.log(data.data.access_token)
+
+        const res1 = await fetch(`http://localhost:8000/api/v1/users?current=${meta.current}&pageSize=${meta.pageSize}`, {
+
             headers: {
+                'Authorization': `Bearer ${access_token}`,
                 "Content-Type": "application/json"
             }
 
         });
 
-        const data = await res.json();
-        // console.log(data.data.access_token)
-        if (data && data.data && data.data.access_token) {
-            const res1 = await fetch("http://localhost:8000/api/v1/users/all", {
-
-                headers: {
-                    'Authorization': `Bearer ${data.data.access_token}`,
-                    "Content-Type": "application/json"
-                }
-
-            });
-            set_accsess_token(data.data.access_token)
-            console.log(data.data.access_token)
-            const data1 = await res1.json();
-
-            console.log('>>> check', data1.data.result)
-            if (data1 && data1.data && data1.data.result && data1.data.result.length > 0) {
-                SetData1(data1.data.result)
-                set_loading_table(false)
-            }
-
+        const data1 = await res1.json()
+        console.log('>>> check', data1.data.result, data1)
+        if (data1 && data1.data && data1.data.meta) {
+            setMeta({
+                current: data1.data.meta.current,
+                pageSize: data1.data.meta.pageSize,
+                pages: data1.data.meta.pages,
+                total: data1.data.meta.total
+            })
         }
+        if (data1 && data1.data && data1.data.result && data1.data.result.length > 0) {
+            SetData1(data1.data.result)
+            set_loading_table(false)
+        }
+
+
 
     }
 
     useEffect(() => {
         // update
         GetData1();
-    }, [])
+    }, [meta.current])
     const function_handle_edit = (record: any) => {
 
         set_open_update_table(true);
         set_data_want_to_edit(record)
         console.log(record)
     }
-    const function_handle_delete = async (id: string) => {
+    const function_handle_delete = async (data: any) => {
         set_modal_delete(true)
-        set_id_delete(id)
+        set_id_delete(data)
         // set_loading_table(true)
         // const res = await fetch("http://localhost:8000/api/v1/auth/login", {
         //     method: 'POST',
@@ -123,6 +122,15 @@ const UserTable = () => {
 
 
     }
+    const HandleonChange = async (page: number, pageSize: number) => {
+        console.log(page, pageSize);
+        setMeta({
+            current: page,
+            pageSize: pageSize,
+            pages: meta.pages,
+            total: meta.total
+        })
+    }
 
     const columns: TableProps<Iitems>['columns'] = [
         {
@@ -149,7 +157,7 @@ const UserTable = () => {
             render: (_, record) => (
                 <Space size="middle">
                     <Button onClick={() => function_handle_edit(record)}> <a>Update</a></Button>
-                    <Button danger onClick={() => function_handle_delete(record._id)}>                    <a>Delete</a>
+                    <Button danger onClick={() => function_handle_delete(record)}><a>Delete</a>
                     </Button>
                 </Space>
             ),
@@ -162,6 +170,12 @@ const UserTable = () => {
                 dataSource={DataTest1}
                 rowKey={'_id'}
                 loading={loading_table}
+                pagination={{
+                    current: meta.current,
+                    pageSize: meta.pageSize,
+                    total: meta.total,
+                    onChange: HandleonChange
+                }}
             />
 
         )

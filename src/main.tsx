@@ -9,7 +9,7 @@ import {
   useLocation
 } from "react-router-dom";
 import UserPage from './screens/user.page.tsx';
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { AppstoreOutlined, MailOutlined, SettingOutlined, HomeOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { Menu } from 'antd';
@@ -54,8 +54,29 @@ const Header = () => {
   return <Menu onClick={onClick} selectedKeys={[current]} mode="horizontal" items={items} />;
 };
 const LayOut = () => {
-  const location = useLocation();
-  console.log('location', location)
+  const GetData = async () => {
+    const res = await fetch("http://localhost:8000/api/v1/auth/login", {
+      method: 'POST',
+      body: JSON.stringify({
+        username: 'admin@gmail.com',
+        password: '123456'
+      },
+      ),
+      headers: {
+        "Content-Type": "application/json"
+      }
+
+    });
+
+    let data = await res.json();
+    if (data && data.data && data.data.access_token) {
+      localStorage.setItem('access_token', data.data.access_token)
+    }
+    console.log(data)
+  }
+  useEffect(() => {
+    GetData();
+  }, [])
   return (
     <div>
       <Header />

@@ -4,15 +4,15 @@ import { Button, Modal } from 'antd';
 interface Iprops {
     open_modal_delete: boolean
     set_modal_delete: (v: boolean) => void
-    get_id_delete: string
+    get_id_delete: any
     GetData1: () => void
 }
 const DeleteModalUser = (props: Iprops) => {
     const [get_id_delete, set_id_delete] = useState('')
 
     useEffect(() => {
-        set_id_delete(props.get_id_delete)
-    }, [props.get_id_delete])
+        set_id_delete(props.get_id_delete._id)
+    }, [props.get_id_delete._id])
     const handleOk = async () => {
         const res = await fetch("http://localhost:8000/api/v1/auth/login", {
             method: 'POST',
@@ -57,7 +57,7 @@ const DeleteModalUser = (props: Iprops) => {
     return (
         <>
             <Modal title="Thông báo" open={props.open_modal_delete} onOk={handleOk} onCancel={handleCancel}>
-                <p>Bạn có muốn xoá người dùng này ?</p>
+                <p>Bạn có muốn xoá người dùng {props.get_id_delete.email} ?</p>
 
             </Modal>
         </>
